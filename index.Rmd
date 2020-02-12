@@ -1,30 +1,148 @@
 ---
-title: "index"
-author: "Jesse"
-date: "20 februari 2019"
-output: html_document
+title: "Portfolio Jesse"
+author: "Jesse van Langeveld"
+date: "06 February 2020"
+output: 
+    flexdashboard::flex_dashboard:
+        storyboard: true
+        theme: lumen
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+# In order to use these packages, we need to install flexdashboard, plotly, and Cairo.
+library(flexdashboard)
+library(Cairo)
+library(plotly)
+library(spotifyr)
+library(tidyverse)
+
+Sys.setenv(SPOTIFY_CLIENT_ID = '7c2b59b8926e48a5a7d930ec3202cd6b')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = '61ca13d05a1d4c748f58f6930e5e52e4')
+
+Spoti.100 <- get_playlist_audio_features('spotify', '37i9dQZF1DXah8e1pvF5oE')
+Other.100 <- get_playlist_audio_features('babydantonio1', '2UJMVdbfO0DdOWospCTttw')
+
+Non_sexual %>% summarise(M = mean(liveness), SD = sd(liveness))
+Sexual %>% summarise(M = mean(liveness), SD = sd(liveness))
+
 ```
 
-## R Markdown
+***
+### Introduction
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+#Lets get it on.
+What makes music sexy?
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+For this corpus I took two spotify playlists that claim something about having sex to the music that's on it. One is songs to have sex to and one are songs not to have sex to. I hope to find the musical features that make music more or less sexy than the other playlist by using the spotify API. I hope to utilize these musical features to get a basic insight in musical properties outside of lyrics and link these to cognitive functions in either stimulation of the brain or even the parts that give us sexual arousal. However, I only expect to find a link between general positive stimulation of the brain. 
 
-```{r cars}
-summary(cars)
+
+###Introduction
+
+# Welcome to the complete and utter nightmare called R studio
+
+***
+
+This is a second column of introductory text.
+
+
+### How sexy is the music
+
+```{r}
+# load spotify
+Spoti.100 <- get_playlist_audio_features('spotify', '37i9dQZF1DXah8e1pvF5oE')
+Other.100 <- get_playlist_audio_features('babydantonio1', '2UJMVdbfO0DdOWospCTttw')
+
+# my tryout
+
+Non_sexual <- get_playlist_audio_features('amswimgirl3', '2NvKGhTSPUnZySmV56rt26')
+Sexual <- get_playlist_audio_features('moan-s', '1v6EVVnTy19Gkr0RZxMl6U')
+
+Best.100 <-rbind(Spoti.100, Other.100)
+
+Sexyness.tidy <-rbind(Non_sexual, Sexual)
+
+ggplot(Best.100, aes(x = energy, y = valence, size = loudness, col = playlist_name))+ geom_point(alpha = 0.6)                
+  facet_grid(. ~ playlist_name)
+
+ggplot(Sexyness, aes(x = energy, 
+                     y = valence, 
+                     size = valence, 
+                     col = mode))+ geom_point(alpha = 0.6)
+facet_wrap(~ playlist)
+  
+
+# example ashley
+
+  
+       # Set up the plot.
+Sexyness <-
+    Non_sexual %>% mutate(playlist = "Non_sex") %>%
+    bind_rows(Sexual %>% mutate(playlist = "Sexual"))
+
+Sexyness <-
+    tibble(
+        playlist = c("Sexual", "Non_sex"),
+        valence = c(0.151, 0.828),
+        energy = c(0.119, 0.717)
+    )
+Sexyness <-
+    Sexyness %>%                   # Start with awards.
+    ggplot(                      # Set up the plot.
+        aes(
+            x = valence,
+            y = energy,
+            size = loudness,
+            colour = mode
+        )
+    ) +
+    geom_point() +               # Scatter plot.
+    geom_rug(size = 0.1) +       # Add 'fringes' to show data distribution.
+    geom_text(                   # Add text labels from above.
+        aes(
+            x = valence,
+            y = energy,
+            label = label),
+        colour = "black",        # Override colour (not mode here).
+        size = 3,                # Override size (not loudness here)original 3.
+        data = Sexyness,         # Specify the data source for labels.
+        hjust = "left",          # Align left side of label with the point.
+        vjust = "bottom",        # Align bottom of label with the point.
+        nudge_x = -0.05,         # Nudge the label slightly left.
+        nudge_y = 0.02           # Nudge the label slightly up.
+    ) +
+    facet_wrap(~ playlist) +     # Separate charts per playlist.
+    scale_x_continuous(          # Fine-tune the x axis.
+        limits = c(0, 1),
+        breaks = c(0, 0.50, 1),  # Use grid-lines for quadrants only.
+        minor_breaks = NULL      # Remove 'minor' grid-lines.
+    ) +
+    scale_y_continuous(          # Fine-tune the y axis in the same way.
+        limits = c(0, 1),
+        breaks = c(0, 0.50, 1),
+        minor_breaks = NULL
+    ) +
+    scale_colour_brewer(         # Use the Color Brewer to choose a palette.
+        type = "qual",           # Qualitative set.
+        palette = "Paired"       # Name of the palette is 'Paired'.
+    ) +
+    scale_size_continuous(       # Fine-tune the sizes of each point.
+        trans = "exp",           # Use an exp transformation to emphasise loud.
+        guide = "none"           # Remove the legend for size.
+    ) +
+    theme_light() +              # Use a simpler theme.
+    labs(                        # Make the titles nice.
+        x = "Valence",
+        y = "Energy",
+        colour = "Mode"
+    )
+ggplotly(Sexyness)
 ```
 
-## Including Plots
+***
 
-You can also embed plots, for example:
+Here is a thorough description of the visualisation.
+Here should be a plot
+![plot1](filename?)!
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
