@@ -13,7 +13,7 @@ As a musicologist it would be easy to find the things that make music sexy or no
 To achieve this I will first look for major differences in the musical features presented by Spotify to see if I can find differences.  When I have found differences I will compare these with a visual graph to make the data visual and readable. Because songs that are sexy are very much dependable on what genre a person is interested in I will add two playlists to the visuals. One with music that fits in either the sexy or the non-sexy playlist and one with more of the genre of from the songs not to have sex to. This gives me more data to compare with so I can further filter the musical features of non-sexy music. 
 
 
-![plot1](Plot 1.png)
+![plot1](plot 1.png)
 
 ### First results.
 
