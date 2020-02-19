@@ -19,4 +19,3 @@ To achieve this I will first look for major differences in the musical features 
 
 In this first plot we see the results of the playlists songs not to have sex to and songs to have sex to. In general it seems that the results are spread everywhere. But when we take a closer look it appears that the sexual songs are somewhere around the middle of the energy range and the non-sexual songs are either very energetic and loud or very low energy and very soft. With the non-sexual songs the valence also seems to be very high or low in connection to the energy levels.
 
-![gif](giftest.gif)
