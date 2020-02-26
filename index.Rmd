@@ -8,108 +8,94 @@ output:
         theme: lumen
 ---
 
+
 ```{r}
-# In order to use these packages, we need to install flexdashboard, plotly, and Cairo.
+
 library(flexdashboard)
+library(dplyr)
 library(Cairo)
 library(plotly)
 library(spotifyr)
 library(tidyverse)
+library(stringi)
+library(compmus)
 
-Sys.setenv(SPOTIFY_CLIENT_ID = '7c2b59b8926e48a5a7d930ec3202cd6b')
-Sys.setenv(SPOTIFY_CLIENT_SECRET = '61ca13d05a1d4c748f58f6930e5e52e4')
-
-Spoti.100 <- get_playlist_audio_features('spotify', '37i9dQZF1DXah8e1pvF5oE')
-Other.100 <- get_playlist_audio_features('babydantonio1', '2UJMVdbfO0DdOWospCTttw')
-
-Non_sexual %>% summarise(M = mean(liveness), SD = sd(liveness))
-Sexual %>% summarise(M = mean(liveness), SD = sd(liveness))
+source("Spotify.R")
 
 ```
 
-***
-### Introduction
 
-#Lets get it on.
-What makes music sexy?
-
-For this corpus I took two spotify playlists that claim something about having sex to the music that's on it. One is songs to have sex to and one are songs not to have sex to. I hope to find the musical features that make music more or less sexy than the other playlist by using the spotify API. I hope to utilize these musical features to get a basic insight in musical properties outside of lyrics and link these to cognitive functions in either stimulation of the brain or even the parts that give us sexual arousal. However, I only expect to find a link between general positive stimulation of the brain. 
+### You can leave your hat on but how about music that is not sexy?
 
 
-###Introduction
-
-# Welcome to the complete and utter nightmare called R studio
+![frontpage](frontpage picture.png) 
 
 ***
+**What makes music not sexy?**
 
-This is a second column of introductory text.
+For this corpus I took two Spotify playlists that claim something about having sex to the music that’s on it. One is songs to have sex to and one are songs not to have sex to. I hope to find the musical features that make music more or less sexy than the other playlist by using the Spotify API. I hope to utilize these musical features to get a first insight in musical properties and link these to cognitive functions in either stimulation of the brain or even the parts that give us sexual arousal. However, I only expect to find a link between general positive stimulation of brain. The aim is to find what it is that makes the songs not to have sex to absolutely not sexy.
+
+As a musicologist it would be easy to find the things that make music sexy or not because the obvious answer would be the subjects of the songs. The lyrics are funny or the songs are parodies of well known songs, party music or famous movie scores. I want to see if I can find musical features that also indicate a level or non-sexiness. 
+
+To achieve this I will first look for major differences in the musical features presented by Spotify to see if I can find differences.  When I have found differences I will compare these with a visual graph to make the data visual and readable. Because songs that are sexy are very much dependable on what genre a person is interested in I will add two playlists to the visuals. One with music that fits in either the sexy or the non-sexy playlist and one with more of the genre of from the songs not to have sex to. This gives me more data to compare with so I can further filter the musical features of non-sexy music. 
 
 
-### How sexy is the music
+### Music that is not sexy is in fact very happy.
 
 ```{r}
-# load spotify
-Spoti.100 <- get_playlist_audio_features('spotify', '37i9dQZF1DXah8e1pvF5oE')
-Other.100 <- get_playlist_audio_features('babydantonio1', '2UJMVdbfO0DdOWospCTttw')
-
-# my tryout
 
 Non_sexual <- get_playlist_audio_features('amswimgirl3', '2NvKGhTSPUnZySmV56rt26')
 Sexual <- get_playlist_audio_features('moan-s', '1v6EVVnTy19Gkr0RZxMl6U')
+#Neutral <-
+Funny <- get_playlist_audio_features('k4day014kim2mlh6v9yl01s90', '2VQOieXP3NDJNReI6rzUQ9')
 
-Best.100 <-rbind(Spoti.100, Other.100)
+#ggplot(Sexyness, aes(x = energy, 
+#                     y = valence, 
+#                     size = valence, 
+#                     col = mode))+ geom_point(alpha = 0.6)
+#facet_wrap(~ playlist)
 
-Sexyness.tidy <-rbind(Non_sexual, Sexual)
-
-ggplot(Best.100, aes(x = energy, y = valence, size = loudness, col = playlist_name))+ geom_point(alpha = 0.6)                
-  facet_grid(. ~ playlist_name)
-
-ggplot(Sexyness, aes(x = energy, 
-                     y = valence, 
-                     size = valence, 
-                     col = mode))+ geom_point(alpha = 0.6)
-facet_wrap(~ playlist)
-  
-
-# example ashley
-
-  
-       # Set up the plot.
 Sexyness <-
     Non_sexual %>% mutate(playlist = "Non_sex") %>%
-    bind_rows(Sexual %>% mutate(playlist = "Sexual"))
+    bind_rows(Sexual %>% mutate(playlist = "Sexual"))%>%
+    bind_rows(Funny %>% mutate(playlist = "Funny"))
 
-Sexyness <-
-    tibble(
-        playlist = c("Sexual", "Non_sex"),
-        valence = c(0.151, 0.828),
-        energy = c(0.119, 0.717)
-    )
-Sexyness <-
+#Sexyness_labels <-
+#    tibble(
+#        label = c("Label 1", "Label 2")
+#        playlist = c("Sexual", "Non_sex"),
+#        valence = c(0.151, 0.828),
+#        energy = c(0.119, 0.717)
+#    )
+
+Sexyness_plot <-
     Sexyness %>%                   # Start with awards.
+    mutate(mode = ifelse(mode == 0, "Minor", "Major")) %>% 
     ggplot(                      # Set up the plot.
         aes(
             x = valence,
             y = energy,
             size = loudness,
-            colour = mode
+            colour = mode,
+            label = track.name,
+            aplha = 0.4
         )
     ) +
     geom_point() +               # Scatter plot.
     geom_rug(size = 0.1) +       # Add 'fringes' to show data distribution.
-    geom_text(                   # Add text labels from above.
-        aes(
-            x = valence,
-            y = energy,
-            label = label),
-        colour = "black",        # Override colour (not mode here).
-        size = 3,                # Override size (not loudness here)original 3.
-        data = Sexyness,         # Specify the data source for labels.
-        hjust = "left",          # Align left side of label with the point.
-        vjust = "bottom",        # Align bottom of label with the point.
-        nudge_x = -0.05,         # Nudge the label slightly left.
-        nudge_y = 0.02           # Nudge the label slightly up.
-    ) +
+    # geom_text(                   # Add text labels from above.
+    #     aes(
+    #         x = valence,
+    #         y = energy,
+    #         label = label),
+    #     colour = "black",        # Override colour (not mode here).
+    #     size = 3,                # Override size (not loudness here)original 3.
+    #     data = Sexyness,         # Specify the data source for labels.
+    #     hjust = "left",          # Align left side of label with the point.
+    #     vjust = "bottom",        # Align bottom of label with the point.
+    #     nudge_x = -0.05,         # Nudge the label slightly left.
+    #     nudge_y = 0.02           # Nudge the label slightly up.
+    # ) +
     facet_wrap(~ playlist) +     # Separate charts per playlist.
     scale_x_continuous(          # Fine-tune the x axis.
         limits = c(0, 1),
@@ -133,16 +119,105 @@ Sexyness <-
     labs(                        # Make the titles nice.
         x = "Valence",
         y = "Energy",
-        colour = "Mode"
+        colour = "Mode",
+        title = "Comparison playlists.",
+        subtitle = "Non-sexy music is happier and funny."
     )
-ggplotly(Sexyness)
+ggplotly(Sexyness_plot)
+```
+
+*** 
+**First results.**
+
+In this first plot we see the results of the playlists songs not to have sex to and songs to have sex to. In general it seems that the results are spread everywhere. But when we take a closer look it appears that the sexual songs are somewhere around the middle of the energy range and the non-sexual songs are either very energetic and loud or very low energy and very soft. With the non-sexual songs the valence also seems to be very high or low in connection to the energy levels.When we look at the Funny playlist consisting of multiple songs from the non-sexy playlist but added much more from that genre we can see that the findings stay the same and even more extreme.the outliers we see at the extreme low ends of valence are either noise music or 8 bit, low quality arcade music. 
+
+
+### Chromagram.
+
+
+```{r}
+# setup
+Hyper_confirmed <- 
+    get_tidy_audio_analysis('7xSN9BtVPgyW0MlfqYpZYJ') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+
+Hyper_confirmed %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    theme_minimal()
+
+# compare two songs
+
+
 ```
 
 ***
-
-Here is a thorough description of the visualisation.
-Here should be a plot
-![plot1](filename?)!
+explain
 
 
+
+### Self Similarity matrix.
+
+```{r}
+bzt <- 
+    get_tidy_audio_analysis('5ZLkc5RY1NM4FtGWEd6HOE') %>% 
+    compmus_align(bars, segments) %>% 
+    select(bars) %>% unnest(bars) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'rms', norm = 'euclidean')) %>% 
+    mutate(
+        timbre = 
+            map(segments, 
+                compmus_summarise, timbre, 
+                method = 'mean'))
+
+bzt %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    theme_classic()
+```
+
+
+***
+explain
+
+
+### Dynamic Time Warping
+
+In order to take the step from chromagrams to [dynamic time warping][3], we need to choose an appropriate distance. Distance metrics usually form conceptual pairs with norms, although there are no standard distance metrics to use after Chebyshev normalisation.
+
+Both Aitchison and angular distances have solid theoretical underpinning for chroma vectors. The Manhattan (a.k.a. *total variation distance* in this case) and the cosine pseudo-distance are faster to compute and are often good enough. The cosine distance, in particular, is extremely popular in practice.
+
+| Domain                      | Normalisation | Distance  |
+| ----------------------------|---------------|-----------|
+| Non-negative (e.g., chroma) | Manhattan     | Manhattan |
+|                             |               | Aitchison |
+|                             | Euclidean     | cosine    |
+|                             |               | angular   |
+|                             | Chebyshev     | [none]    |
+
+
+```{r}
+
+```
 
